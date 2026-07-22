@@ -1,7 +1,10 @@
 import pandas as pd
 from pathlib import Path
 
-from utils import load_pipeline
+try:
+    from src.utils import load_pipeline
+except ModuleNotFoundError:
+    from utils import load_pipeline
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -10,12 +13,16 @@ MODEL_PATH = PROJECT_ROOT / "models" / "salary_prediction_pipeline.pkl"
 
 class SalaryPredictor:
 
-    def __init__(self, model_path):
-        self.pipeline = load_pipeline(model_path)
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
 
-    def predict(self, employee_data):
-        df = pd.DataFrame(employee_data)
-        return self.pipeline.predict(df)
+    def predict(self, request):
+
+        df = pd.DataFrame([request])
+
+        prediction = self.pipeline.predict(df)
+
+        return float(prediction[0])
 
 
 def predict_salary(employee_data):
@@ -34,17 +41,17 @@ def predict_salary(employee_data):
 
 if __name__ == "__main__":
 
-    predictor = SalaryPredictor(MODEL_PATH)
+    predictor = SalaryPredictor(load_pipeline(MODEL_PATH))
 
     employee = {
-        "work_year": [2025],
-        "experience_level": ["SE"],
-        "employment_type": ["FT"],
-        "job_title": ["Data Scientist"],
-        "employee_residence": ["US"],
-        "remote_ratio": [100],
-        "company_location": ["US"],
-        "company_size": ["M"],
+        "work_year": 2025,
+        "experience_level": "SE",
+        "employment_type": "FT",
+        "job_title": "Data Scientist",
+        "employee_residence": "US",
+        "remote_ratio": 100,
+        "company_location": "US",
+        "company_size": "M",
     }
 
     prediction = predictor.predict(employee)
